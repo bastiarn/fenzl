@@ -1,12 +1,22 @@
 import { useEffect, useState } from "react";
-import useGame from "../lib/hooks/Game";
+import useGame from "../lib/hooks/useGame";
 import io from "socket.io-client";
 
 function Game({ socket }) {
   const { startGame, ...state } = useGame(socket);
   return (
     <>
-      <button onClick={startGame}>Start Game</button>
+      {state.gameState == "STOPPED" && (
+        <button onClick={startGame}>Start Game</button>
+      )}
+      {state.gameState == "ANNOUNCEMENT" && <h1>ANNOUNCEMENT</h1>}
+      {state.gameState == "RUNNING" && <h1>RUNNING</h1>}
+      {state.gameState == "LOST" && (
+        <>
+          <h1>U LOST. U NOOB.</h1>
+          <button onClick={startGame}>Replay</button>
+        </>
+      )}
       <pre>{JSON.stringify(state, null, 2)}</pre>
     </>
   );
