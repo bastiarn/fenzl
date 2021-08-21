@@ -1,16 +1,198 @@
-html,
-body {
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400&family=Raleway&display=swap");
+
+/* ALLGEMEIN */
+
+*,
+*::before,
+*::after {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  box-sizing: border-box;
 }
 
 a {
-  color: inherit;
   text-decoration: none;
 }
 
-* {
-  box-sizing: border-box;
+button {
+  border: none;
+  outline: none;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  padding: 2rem 4rem;
+  border-radius: 12px;
+  font-family: "Raleway";
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+h1 {
+  font-family: "Raleway";
+  font-size: 4rem;
+  font-weight: 300;
+}
+
+html,
+body,
+.page-stopped,
+.page-anythingelse {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background-color: #000;
+  color: #fff;
+  font-family: "Open Sans";
+}
+
+.page-anythingelse.announcement {
+  background-color: hsla(0, 0%, 20%);
+}
+
+.page-anythingelse.critical {
+  background-color: hsla(0, 100%, 50%, 0.1);
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+}
+
+.center.hz {
+  align-items: center;
+}
+
+.center.vc {
+  justify-content: center;
+}
+
+/* GRAPH */
+
+.graph {
+  position: absolute;
+  bottom: -30px;
+  top: 0;
+  left: -8px;
+  right: -8px;
+}
+
+/* UI ELEMENTE */
+
+.ui-elements,
+.overlay-announcement,
+.overlay-lost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay-announcement {
+  background-color: hsla(0, 0%, 20%, 0.5);
+}
+
+.overlay-announcement h1 {
+  grid-area: h1;
+  text-align: center;
+}
+
+.overlay-lost {
+  background-color: hsla(0, 80%, 15%, 0.8);
+}
+
+.ui-elements {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 5rem auto 5rem;
+  grid-template-rows: max-content auto max-content;
+  grid-template-areas:
+    "countdown range spacer0"
+    "spacer1 h1 spacer2"
+    "spacer3 db-display lives";
+  justify-content: space-between;
+  align-items: center;
+}
+
+.countdown {
+  grid-area: countdown;
+  font-size: 1.5rem;
+}
+
+.range {
+  grid-area: range;
+  text-align: center;
+}
+
+.range > span {
+  font-size: 1.5rem;
+}
+
+.db-display {
+  grid-area: db-display;
+  display: grid;
+  grid-template-columns: 1fr auto auto 1fr;
+  grid-template-rows: 1rem auto 1rem;
+  grid-template-areas:
+    "spacer0 max spacer1 spacer1"
+    "spacer2 current-int current-dec dba"
+    "spacer3 min spacer4 spacer4";
+  align-items: first baseline;
+  row-gap: 2px;
+}
+
+.current-db-int,
+.current-db-dec {
+  font-size: 3rem;
+}
+
+.current-db-int {
+  grid-area: current-int;
+}
+
+.current-db-dec {
+  grid-area: current-dec;
+  font-size: 2.5rem;
+}
+
+.dba {
+  grid-area: dba;
+}
+
+.range-min,
+.range-max {
+  justify-self: center;
+}
+
+.range-min {
+  grid-area: min;
+}
+
+.range-max {
+  grid-area: max;
+}
+
+.lives {
+  grid-area: lives;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  font-size: 2rem;
+}
+
+.lives > span {
+  margin-top: -2px;
+}
+
+.lives.good {
+  background-color: hsl(222, 100%, 70%);
+}
+
+.lives.warning {
+  background-color: orange;
+}
+
+.lives.critical {
+  background-color: #ff152b;
 }

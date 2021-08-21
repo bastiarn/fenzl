@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 const RANGE_MIN = 45;
 const RANGE_MAX = 110;
 const RANGE_SIZES = [25, 35, 45, 65];
-const PREP_TIME = 3;
+const PREP_TIME = 10;
 const MAX_LIVES = 10;
-const ROUND_TIME = 15 * 60;
+const ROUND_TIME = 15;
 
 function createRange() {
   let range = RANGE_SIZES[Math.floor(Math.random() * RANGE_SIZES.length)];
@@ -60,7 +60,12 @@ const useLives = (maxLives, onDeath) => {
 };
 const usePast = (history = [], historyLength = 20) => {
   // Take the most hisoryLength recent entries in history
-  const initialHistory = history.slice(-historyLength);
+  let initialHistory;
+  if (history.length > historyLength) {
+    initialHistory = history.slice(-historyLength);
+  } else {
+    initialHistory = [...history, ...Array(historyLength - history.length)];
+  }
   const [state, setState] = useState(initialHistory);
   const appendElement = (el) => {
     setState((state) => {
@@ -74,22 +79,32 @@ const usePast = (history = [], historyLength = 20) => {
 
   return [state, appendElement];
 };
-export default function useGame(socket) {
+export default function useGame(socket, historyLength = 40) {
   const [gameState, setGameState] = useState("STOPPED");
   const [lives, takeHit, resetLives] = useLives(MAX_LIVES, () =>
     setGameState("LOST")
   );
   const [range, setNewRange] = useRange();
   const [secondsLeft, setSecondsLeft] = useState();
-  const [history, newEntry] = usePast([], 20);
+  const [history, newEntry] = usePast([], historyLength);
   const startGame = () => setGameState("ANNOUNCEMENT");
 
   useEffect(() => {
     switch (gameState) {
       case "STOPPED":
         break;
+
+      case "LOST":
+        // TODO: - SET DOM VISUAL ALARM
+        //       - PLAY AUDIO ALARM
+        //       - GOTO STATE "STOPPED" ONCE DONE
+        break;
       case "ANNOUNCEMENT":
         setNewRange();
+        resetLives();
+        const announcementHandler = (dB) => {
+          newEntry({ dB, hit: false, doesNotCount: true });
+        };
         let announcementTimer = setCountdown(
           (timeLeft) => {
             setSecondsLeft(timeLeft);
@@ -99,10 +114,13 @@ export default function useGame(socket) {
           },
           PREP_TIME
         );
-        return () => clearInterval(announcementTimer);
+        socket.on("rt_in", announcementHandler);
+        return () => {
+          socket.off("rt_in", announcementHandler);
+          clearInterval(announcementTimer);
+        };
       case "RUNNING":
-        resetLives();
-        const RealTimeInHandler = (dB) => {
+        const gameHandler = (dB) => {
           const [min, max] = range;
           if (dB > max || dB < min) {
             takeHit();
@@ -118,25 +136,21 @@ export default function useGame(socket) {
           startGame,
           ROUND_TIME
         );
-        socket.on("rt_in", RealTimeInHandler);
+        socket.on("rt_in", gameHandler);
         return () => {
-          socket.off("rt_in", RealTimeInHandler);
+          socket.off("rt_in", gameHandler);
           clearInterval(roundTimer);
         };
-      case "LOST":
-        // TODO: - SET DOM VISUAL ALARM
-        //       - PLAY AUDIO ALARM
-        //       - GOTO STATE "STOPPED" ONCE DONE
-        break;
     }
   }, [gameState, socket]);
 
   return {
     gameState,
-    ...(gameState == "ANNOUNCEMENT" && { secondsLeft, range }),
+    ...(gameState == "ANNOUNCEMENT" && { secondsLeft, lives, range }),
     ...(gameState == "RUNNING" && { secondsLeft, lives, range }),
-    ...(gameState == "LOST" && { lives }),
     history,
+    currentState: history[history.length - 1],
+    maxLives: MAX_LIVES,
     startGame,
   };
 }

@@ -13,16 +13,6 @@ const PORT = 3000;
 
 const nextApp = next({ dev: DEV });
 const nextHandler = nextApp.getRequestHandler();
-let count = 1;
-
-io.on("connect", (socket) => {
-  console.log("connected!");
-  socket.emit("init", count);
-  socket.on("click", (c) => {
-    count = c;
-    socket.broadcast.emit("click", count);
-  });
-});
 
 nextApp.prepare().then(() => {
   app.all("*", (req, res) => {
