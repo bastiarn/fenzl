@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 
-const RANGE_MIN = 45;
-const RANGE_MAX = 110;
-const RANGE_SIZES = [25, 35, 45, 65];
-const PREP_TIME = 10;
-const MAX_LIVES = 10;
-const ROUND_TIME = 15;
+const RANGE_MIN = 35;
+const RANGE_MAX = 90;
+const RANGE_SIZES = [15, 20, 25, 35];
+const PREP_TIME = 15;
+const MAX_LIVES = 5;
+const ROUND_TIME = 5 * 60;
 
 function createRange() {
   let range = RANGE_SIZES[Math.floor(Math.random() * RANGE_SIZES.length)];

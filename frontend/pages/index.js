@@ -3,6 +3,26 @@ import useGame from "../lib/hooks/useGame";
 import io from "socket.io-client";
 import Chart from "../lib/components/Chart";
 
+const useAudio = (url) => {
+  const [audio] = useState(new Audio(url));
+  const [playing, setPlaying] = useState(false);
+
+  const toggle = () => setPlaying(!playing);
+
+  useEffect(() => {
+    playing ? audio.play() : audio.pause();
+  }, [playing]);
+
+  useEffect(() => {
+    audio.addEventListener("ended", () => setPlaying(false));
+    return () => {
+      audio.removeEventListener("ended", () => setPlaying(false));
+    };
+  }, []);
+
+  return [playing, toggle];
+};
+
 function Stopped({ startGame }) {
   return (
     <div className="page-stopped center hz vc">
@@ -29,6 +49,22 @@ function InGame({ startGame, data }) {
     history,
     secondsLeft,
   } = data;
+  const [startGameAudioPlaying, toggleStartGameAudio] =
+    useAudio("DontPanic.ogg");
+  const [lostAudio, toggleLostAudio] = useAudio("Fomalhaut.ogg");
+  const [hitAudio, toggleHitAudio] = useAudio("Gallium.ogg");
+  useEffect(() => {
+    if (currentState?.hit) {
+      toggleHitAudio();
+    }
+  }, [currentState]);
+  useEffect(() => {
+    if (gameState === "RUNNING") {
+      toggleStartGameAudio();
+    } else if (gameState === "LOST") {
+      toggleLostAudio();
+    }
+  }, [gameState]);
   let livesUsedPercentage = (maxLives - lives) / maxLives;
   let livesColor;
   if (livesUsedPercentage < 0.33) {
@@ -51,6 +87,7 @@ function InGame({ startGame, data }) {
       </div>
       <div className="ui-elements">
         <div className="countdown">{secondsLeft}</div>
+
         <div className="db-display">
           {range && (
             <>
